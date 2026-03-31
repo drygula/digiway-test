@@ -114,3 +114,7 @@ https://digiway.buckey.space/
 
 - Username: digiway-admin
 - Password: z26J 2qnr TJoU yDso 9ep0 j0Sj
+
+## Зауваження
+
+Плагін Hyyan WooCommerce Polylang Integration застарілий, я виправив в його коді помилку форматування, але при встановленні з нуля він викликатиме помилку.
