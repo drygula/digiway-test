@@ -1,119 +1,97 @@
-Digiway Test Project
-Репозиторій містить дочірню тему, для розгортання WordPress + WooCommerce проєкту з підтримкою мультимовності (Polylang) та кастомним REST API для імпорту товарів.
+# Digiway Test Project
+
+Репозиторій містить дочірню тему та дамп бази даних для розгортання WordPress + WooCommerce проєкту з підтримкою мультимовності (Polylang) та кастомним REST API для імпорту товарів.
+
 Розгорнутий проєкт знаходиться тут:
 https://digiway.buckey.space/
 
-Інструкція по розгортанню
-1. Клонування репозиторію
-git clone https://github.com/drygula/digiway-test.git
+## Інструкція по розгортанню
 
-2. Налаштування WordPress
-Створіть новий сайт на WP.  та підключи файли проєкту.
+1. Налаштування WordPress
+   Створіть новий сайт на WP.
+   Сайт повинен містити стандартну тему Twenty Twenty-Five.
+
+2. Тема
+   Скопіюйте вміст репозиторію
+   git clone https://github.com/drygula/digiway-test.git
+   в папку wp-content/themes/digiway-test.
+   Після цього активуйте цю тему в адмінці WordPress:
+   Зовнішній вигляд → Теми
+
+3. Плагіни
+   Перед імпортом бази даних потрібно встановити й активувати такі плагіни:
+   WooCommerce
+   Polylang
+   Contact Form 7
+   Multilingual Contact Form 7 with Polylang
+   Hyyan WooCommerce Polylang Integration
 
 4. Імпорт бази даних
-wp db import database.sql
+   Файл бази даних знаходиться тут:
+   db-backup/local-20260331-151030.sql
+   Імпорт можна зробити через Adminer/phpMyAdmin.
 
-або через phpMyAdmin.
+5. Оновлення домену (якщо потрібно)
+   Після імпорту бази даних потрібно оновити siteurl і home, якщо домен відрізняється від локального оригіналу.
 
-4. Оновлення домену (якщо потрібно)
-wp search-replace 'old-url' 'new-url'
-5. Перевірка
+6. Перевірка
+   Після імпорту переконайтесь, що:
+   активна дочірня тема;
+   активні потрібні плагіни;
+   товари відображаються;
+   Polylang працює коректно;
+   REST API доступний.
 
-Переконайся, що:
+## Інструкція для викликів API
 
-WooCommerce активний
-Polylang активний
-Дочірня тема активована
-📡 Виклик API
-Endpoint
-POST /wp-json/test/v1/import-products
-Повний URL (локально)
-http://your-site.local/wp-json/test/v1/import-products
-🔐 Авторизація
+1. Для перевірки доступності API скористайтеся
+   GET /wp-json/test/v1/ping
+   Endpoint для розгорнутого сайту - https://digiway.buckey.space/wp-json/test/v1/ping
+2. Для імпорту товарів
+   POST /wp-json/test/v1/import-products
+   https://digiway.buckey.space/wp-json/test/v1/import-products
+   Імпорт працює через авторизацію, доступи додані в кінці документу.
 
-Для локального тесту:
+## Приклад JSON для виконання імпорту
 
-'permission_callback' => '__return_true'
-
-У продакшені рекомендується використовувати:
-
-Application Passwords
-або Bearer Token
-📦 Приклад запиту
-Headers
-Content-Type: application/json
-Body
+```json
 [
-  {
-    "sku": "CHAIR-001",
-    "name": "Стілець",
-    "price": 49.99,
-    "stock": 10,
-    "translations": {
-      "en": {
-        "name": "Chair"
-      }
-    }
-  }
+	{
+		"sku": "CHAIR-001",
+		"name": "Стілець",
+		"price": 49.99,
+		"stock": 10,
+		"translations": {
+			"en": {
+				"name": "Chair"
+			}
+		}
+	}
 ]
-📊 Відповідь API
+```
+
+### Логіка імпорту
+
+- якщо товару з таким SKU не існує — він створюється;
+- якщо товар із таким SKU уже існує — він оновлюється;
+- для товару створюється або оновлюється переклад англійською мовою;
+- при повторному імпорті дублікати не створюються.
+
+### Приклад відповіді
+
+```json
 {
-  "created": 1,
-  "updated": 0,
-  "skipped": 0,
-  "meta": {
-    "success": true,
-    "total": 1
-  }
+	"created": 1,
+	"updated": 0,
+	"skipped": 0,
+	"meta": {
+		"success": true,
+		"total": 1
+	}
 }
-🔁 Логіка імпорту
-Якщо SKU не існує → створюється товар
-Якщо SKU існує → товар оновлюється
-Створюється або оновлюється переклад (EN)
-Дублікатів не створюється
-🧠 Особливості реалізації
-SKU використовується як унікальний ідентифікатор
-Переклади товарів звʼязуються через Polylang
-SKU не дублюється в перекладах (уникнення конфліктів)
-📁 Структура проєкту
-wp-content/
-└── themes/
-    └── your-child-theme/
-        ├── functions.php
-        └── inc/
-            └── api/
-                └── import-products.php
-⚠️ Важливо
-Git НЕ містить базу даних
-Git НЕ містить uploads
-Для повного відновлення потрібні:
-database.sql
-wp-content/uploads/
-🔑 Доступи
+```
 
-Для перевірки можна використовувати:
+## Доступи для перевірки
 
-WordPress Admin
-URL: http://your-site.local/wp-admin
-Login: admin
-Password: admin
-
-(змінити при необхідності)
-
-🧪 Тестування
-1. Перший запуск
-
-→ створює товар
-
-2. Повторний запуск
-
-→ оновлює товар (не створює дубль)
-
-📌 Рекомендації
-
-Для продакшена:
-
-використовувати Composer для плагінів
-винести API у окремий плагін
-додати авторизацію
-обробку помилок і логування
+- Username: digiway-admin
+- Password: z26J 2qnr TJoU yDso 9ep0 j0Sj
